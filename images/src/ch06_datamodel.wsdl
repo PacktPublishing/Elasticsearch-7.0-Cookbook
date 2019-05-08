@@ -1,0 +1,19 @@
+@startuml
+class Book {
+  title: text
+  description: text
+  quantity: integer
+  position: integer
+  price: double
+  uuid: keyword
+}
+
+class Author {
+  name: String
+  surname: String
+  rating: double
+}
+
+
+Book *-- Author: 1:n
+@enduml

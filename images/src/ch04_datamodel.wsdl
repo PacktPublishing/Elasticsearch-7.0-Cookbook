@@ -1,0 +1,12 @@
+@startuml
+class Book {
+  id: keyword
+  date: date
+  title: text
+  description: text
+  quantity: integer
+  position: integer
+  price: double
+  uuid: keyword
+}
+@enduml

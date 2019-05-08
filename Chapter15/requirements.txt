@@ -1,0 +1,5 @@
+elasticsearch
+requests
+pandas
+matplotlib
+sklearn

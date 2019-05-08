@@ -1,0 +1,16 @@
+@startuml
+class Order {
+  id: keyword
+  date: date
+  customer_id: keyword
+  sent: boolean
+}
+
+class Item {
+  name: text
+  quantity: integer
+  vat: double
+}
+
+Order -- Item: 0..n
+@enduml
