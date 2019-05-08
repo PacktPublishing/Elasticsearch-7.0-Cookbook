@@ -1,0 +1,317 @@
+POST /index-agg/_search
+{
+  "query": {
+    "function_score": {
+      "script_score": {
+        "script": {
+          "lang": "painless",
+          "source": "doc['price'].value * 1.2"
+        }
+      }
+    }
+  }
+}
+
+
+POST /_scripts/my_script
+{
+  "script": {
+    "source": """doc['price'].value * params.factor""",
+    "lang":"painless"
+  }
+}
+
+POST /index-agg/_search?size=2
+{
+  "sort": {
+    "_script": {
+      "script": {
+        "id": "my_script",
+        "params": {
+          "factor": 1.2
+        }
+      },
+      "type": "number",
+      "order": "desc"
+    }
+  },
+  "_source": {
+    "includes": [
+      "price"
+    ]
+  }
+}
+
+# Sorting data using scripts
+POST /index-agg/_search?size=2
+{
+  "sort": {
+    "_script": {
+      "script": {
+        "source": """
+Math.sqrt(doc["price"].value *
+params.factor)
+""",
+        "params": {
+          "factor": 1.2
+        }
+      },
+      "type": "number",
+      "order": "desc"
+    }
+  },
+  "_source": {
+    "includes": [
+      "price"
+    ]
+  }
+}
+
+
+# sort random
+GET /index-agg/_search?&size=2
+{
+  "sort": {
+    "_script": {
+      "script": {
+        "source": "Math.random()"
+      },
+      "type": "number",
+      "order": "asc"
+    }
+  },
+  "_source": false
+}
+
+#computed return fields with scripting
+POST /index-agg/_search?size=2
+{
+  "script_fields": {
+    "my_calc_field": {
+      "script": {
+        "source": """params._source.name + " -- " + params._source.description"""
+      }
+    },
+    "my_calc_field2": {
+      "script": {
+        "source": """doc["price"].value * params.discount""",
+        "params": {
+          "discount": 0.8
+        }
+      }
+    }
+  }
+}
+
+# Filtering via scripting
+POST /index-agg/_search?size=3
+{
+  "query": {
+    "bool": {
+      "filter": {
+        "script": {
+          "script": {
+            "source": """doc['price'].value > params.param1""",
+            "params": {
+              "param1": 80
+            }
+          }
+        }
+      }
+    }
+  },
+  "_source": {
+    "includes": [
+      "name",
+      "price"
+    ]
+  }
+}
+
+
+# Using scripting in aggregations
+POST /index-agg/_search?size=0
+{
+  "aggs": {
+    "my_value": {
+      "sum": {
+        "script": {
+          "source": """doc["price"].value * doc["price"].value"""
+        }
+      }
+    }
+  }
+}
+
+POST /index-agg/_search?size=0
+{
+  "aggs": {
+    "my_value": {
+      "sum": {
+        "field": "price",
+        "script": {
+          "source": "_value * _value"
+        }
+      }
+    }
+  }
+}
+
+
+POST /index-agg/_search?size=0
+{
+  "aggs": {
+    "my_value": {
+      "terms": {
+        "field": "tag",
+        "size": 5,
+        "script": {
+          "source": """
+if(params.replace.containsKey(_value.toUpperCase())) {
+  params.replace[_value.toUpperCase()] 
+} else {
+  _value.toUpperCase() 
+}
+""",
+          "params": {
+            "replace": {
+              "LABORUM": "Result1",
+              "MAIORES": "Result2",
+              "FACILIS": "Result3"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+# updating a document via scripting
+POST /index-agg/_update/10
+{
+  "script": {
+    "source": "ctx._source.age = ctx._source.age + params.sum",
+    "params": {
+      "sum": 2
+    }
+  }
+}
+
+GET /index-agg/_doc/10
+
+POST /index-agg/_update/10
+{
+  "script": {
+    "source": """
+    ctx.op = "none";
+    if(ctx._source.containsValue("tags")){
+      for(def item : params.new_tags){
+        if(!ctx._source.tags.contains(item)){
+          ctx._source.tags.add(item);
+          ctx.op = "index";
+        }
+      }
+    }else{ 
+      ctx._source.tags=params.new_tags; 
+      ctx.op = "index" 
+    }
+    
+    if(ctx._source.containsValue("labels")){
+      for(def item : params.new_labels){
+        if(!ctx._source.labels.contains(item)){
+          ctx._source.labels.add(item);
+          ctx.op = "index"
+        }
+      }
+    }else{
+      ctx._source.labels=params.new_labels;
+      ctx.op = "index"
+    }
+""",
+    "params": {
+      "new_tags": [
+        "cool",
+        "nice"
+      ],
+      "new_labels": [
+        "red",
+        "blue",
+        "green"
+      ]
+    }
+  }
+}
+
+
+#reindex with scripting
+
+DELETE reindex-scripting
+
+PUT /reindex-scripting
+{
+  "mappings": {
+    "_doc": {
+      "properties": {
+        "name": {
+          "term_vector": "with_positions_offsets",
+          "boost": 1,
+          "store": true,
+          "type": "text"
+        },
+        "title": {
+          "term_vector": "with_positions_offsets",
+          "boost": 1,
+          "store": true,
+          "type": "text"
+        },
+        "parsedtext": {
+          "term_vector": "with_positions_offsets",
+          "boost": 1,
+          "store": true,
+          "type": "text"
+        },
+        "tag": {
+          "type": "keyword",
+          "store": true
+        },
+        "processed": {
+          "type": "boolean"
+        },
+        "date": {
+          "type": "date",
+          "store": true
+        },
+        "position": {
+          "type": "geo_point",
+          "store": true
+        },
+        "uuid": {
+          "boost": 1,
+          "store": true,
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}
+
+
+POST /_reindex
+{
+  "source": {
+    "index": "index-agg"
+  },
+  "dest": {
+    "index": "reindex-scripting"
+  },
+  "script": {
+    "source": """
+if(!ctx._source.containsKey("processed")){
+  ctx._source.processed=true
+}
+"""
+  }
+}
+
+GET /reindex-scripting/_doc/10  
+

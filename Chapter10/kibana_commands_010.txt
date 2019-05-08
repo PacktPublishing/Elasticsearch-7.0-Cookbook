@@ -1,0 +1,71 @@
+#Managing repositories
+
+PUT /_snapshot/my_repository
+{
+  "type": "fs",
+  "settings": {
+    "location": "/backup/my_repository",
+    "compress": true
+  }
+}
+
+GET /_snapshot/my_repository
+
+DELETE /_snapshot/my_repository
+
+GET /_snapshot
+
+POST /_snapshot/my_repository/_verify
+
+#Executing a snapshot
+
+PUT /_snapshot/my_repository/snap_1?wait_for_completion=true
+{
+  "indices": "index*,mybooks*,mygeo*",
+  "ignore_unavailable": "true",
+  "include_global_state": false
+}
+
+GET /_snapshot/my_repository/snap_1
+
+DELETE /_snapshot/my_repository/snap_1
+
+GET /_snapshot/my_repository/
+
+
+GET /_snapshot/my_repository/snap_1/_status
+
+# Restoring a snapshot
+POST /_snapshot/my_repository/snap_1/_restore
+{
+  "indices": "mybooks-*",
+  "ignore_unavailable": "true",
+  "include_global_state": false,
+  "rename_pattern": "mybooks-(.+)",
+  "rename_replacement": "copy_$1"
+}
+
+
+PUT /_snapshot/my_repository
+{
+  "type": "fs",
+  "settings": {
+    "location": "/ mnt/nfs/my_repository",
+    "compress": true
+  }
+}
+
+
+POST /_reindex
+{
+  "source": {
+    "remote": {
+      "host": "http://192.168.1.227:9200"
+    },
+    "index": "test-source"
+  },
+  "dest": {
+    "index": "test-dest"
+  }
+}
+

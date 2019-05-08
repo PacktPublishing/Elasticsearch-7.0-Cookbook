@@ -1,0 +1,720 @@
+GET /index-agg/_search?size=1
+
+GET /index-agg/_search?size=0
+{
+  "aggregations": {
+    "tag": {
+      "terms": {
+        "field": "tag",
+        "size": 10
+      }
+    }
+  }
+}
+
+#stats
+POST index-agg/_search?size=0
+{
+  "aggs": {
+    "age_stats": {
+      "extended_stats": {
+        "field": "age"
+      }
+    }
+  }
+}
+
+#terms
+GET /index-agg/_search?size=0
+{
+  "aggs": {
+    "tag": {
+      "terms": {
+        "field": "tag",
+        "size": 3
+      }
+    }
+  }
+}
+
+GET /index-agg/_search?size=0
+{
+  "aggs": {
+    "tag": {
+      "terms": {
+        "field": "tag",
+        "script": {
+          "source": "_value + '123'"
+        }
+      }
+    }
+  }
+}
+
+GET /index-agg/_search?size=0
+{
+  "aggs": {
+    "tag": {
+      "terms": {
+        "script": {
+          "source": """doc['tag'].value"""
+        }
+      }
+    }
+  }
+}
+
+#significant term
+GET /index-agg/_search?size=0
+{
+  "query": {
+    "terms": {
+      "tag": [
+        "ullam",
+        "in",
+        "ex"
+      ]
+    }
+  },
+  "aggs": {
+    "significant_tags": {
+      "significant_terms": {
+        "field": "tag"
+      }
+    }
+  }
+}
+
+GET /index-agg/_search?size=0
+{
+  "query": {
+    "terms": {
+      "tag": [
+        "ullam",
+        "in",
+        "ex"
+      ]
+    }
+  },
+  "aggs": {
+    "tags": {
+      "terms": {
+        "field": "tag"
+      }
+    }
+  }
+}
+
+GET /index-agg/_search?size=0
+{
+  "query": {
+    "terms": {
+      "tag": [
+        "ullam",
+        "in",
+        "ex"
+      ]
+    }
+  },
+  "aggs": {
+    "tags": {
+      "terms": {
+        "field": "tag"
+      }
+    }
+  }
+}
+
+GET /index-agg/_search?size=0
+{
+    "aggregations" : {
+        "my_sample" : {
+            "sampler" : {
+                "shard_size" : 100
+            },
+            "aggregations": {
+                "keywords" : {
+                    "significant_text" : { "field" : "description" }
+                }
+            }
+        }
+    }
+}
+
+#range aggregation
+
+GET /index-agg/_search?size=0
+{
+  "aggs": {
+    "prices": {
+      "range": {
+        "field": "price",
+        "ranges": [
+          {
+            "to": 10
+          },
+          {
+            "from": 10,
+            "to": 20
+          },
+          {
+            "from": 20,
+            "to": 100
+          },
+          {
+            "from": 100
+          }
+        ]
+      }
+    },
+    "ages": {
+      "range": {
+        "field": "age",
+        "ranges": [
+          {
+            "to": 25
+          },
+          {
+            "from": 25,
+            "to": 50
+          },
+          {
+            "from": 50,
+            "to": 75
+          },
+          {
+            "from": 75
+          }
+        ]
+      }
+    },
+    "range": {
+      "range": {
+        "field": "date",
+        "ranges": [
+          {
+            "from": "2016-01-01",
+            "to": "2016-07-01"
+          },
+          {
+            "from": "2017-07-01",
+            "to": "2017-12-31"
+          },
+          {
+            "from": "2018-01-01",
+            "to": "2018-12-31"
+          }
+        ]
+      }
+    }
+  }
+}
+
+GET /index-agg/_search?size=0
+{
+  "aggs": {
+    "range": {
+      "date_range": {
+        "field": "date",
+        "format": "MM-yyyy",
+        "ranges": [
+          {
+            "to": "now-6M/M"
+          },
+          {
+            "from": "now-6M/M"
+          }
+        ]
+      }
+    }
+  }
+}
+
+GET /index-agg/_search?size=0
+{
+  "aggs": {
+    "ip_ranges": {
+      "ip_range": {
+        "field": "ip",
+        "ranges": [
+          {
+            "to": "192.168.1.1"
+          },
+          {
+            "from": "192.168.2.255"
+          }
+        ]
+      }
+    }
+  }
+}
+
+GET /index-agg/_search?size=0
+{
+  "aggs": {
+    "ip_ranges": {
+      "ip_range": {
+        "field": "ip",
+        "ranges": [
+          {
+            "mask": "192.168.1.0/25"
+          },
+          {
+            "mask": "192.168.1.127/25"
+          }
+        ]
+      }
+    }
+  }
+}
+
+#histogram aggregation
+
+POST /index-agg/_search?size=0
+{
+  "aggregations": {
+    "age": {
+      "histogram": {
+        "field": "age",
+        "interval": 5
+      }
+    },
+    "price": {
+      "histogram": {
+        "field": "price",
+        "interval": 10
+      }
+    }
+  }
+}
+
+
+
+POST /index-agg/_search?size=0
+{
+  "aggs": {
+    "age": {
+      "histogram": {
+        "script": {
+          "source": "doc['age'].value*3"
+        },
+        "interval": 5
+      }
+    }
+  }
+}
+
+POST /index-agg/_search?size=0
+{
+        "aggs" : {
+        "prices" : {
+            "histogram" : {
+                "field" : "price",
+                "interval" : 5,
+                "extended_bounds" : {
+                    "min" : 0,
+                    "max" : 150
+                }
+            }
+        }
+    }
+}
+
+#date histogram
+POST /index-agg/_search?size=0
+{
+  "aggs": {
+    "date_year": {
+      "date_histogram": {
+        "field": "date",
+        "interval": "year"
+      }
+    },
+    "date_quarter": {
+      "date_histogram": {
+        "field": "date",
+        "interval": "quarter",
+        "time_zone": "+01:00"
+      }
+    }
+  }
+}
+
+POST /index-agg/_search?size=0
+{
+  "aggs": {
+    "10_buckets_date": {
+      "auto_date_histogram": {
+        "field": "date",
+        "buckets": 1000,
+        "format": "yyyy-MM-dd"
+      }
+    }
+  }
+}
+
+#filter
+POST /index-agg/_search?size=0
+{
+  "aggregations": {
+    "ullam_docs": {
+      "filter": {
+        "term": {
+          "tag": "ullam"
+        }
+      }
+    },
+    "age37_docs": {
+      "filter": {
+        "term": {
+          "age": 37
+        }
+      }
+    }
+  }
+}
+
+POST /index-agg/_search?size=0
+{
+  "aggs": {
+    "missing_code": {
+      "missing": {
+        "field": "code"
+      }
+    }
+  }
+}
+
+POST /index-agg/_search?size=0
+{
+  "aggs": {
+    "expensive_docs": {
+      "filters": {
+        "other_bucket": true,
+        "other_bucket_key": "other_documents",
+        "filters": {
+          "2016_over_50": {
+            "bool": {
+              "must": [
+                {
+                  "range": {
+                    "date": {
+                      "gte": "2016-01-01"
+                    }
+                  }
+                },
+                {
+                  "range": {
+                    "price": {
+                      "gte": 50
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "previous_2016_over_50": {
+            "bool": {
+              "must": [
+                {
+                  "range": {
+                    "date": {
+                      "lt": "2016-01-01"
+                    }
+                  }
+                },
+                {
+                  "range": {
+                    "price": {
+                      "gte": 50
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+# global aggregation
+POST /index-agg/_search?size=0
+{
+  "query": {
+    "term": {
+      "tag": "ullam"
+    }
+  },
+  "aggregations": {
+    "query_age_avg": {
+      "avg": {
+        "field": "age"
+      }
+    },
+    "all_persons": {
+      "global": {},
+      "aggs": {
+        "age_global_avg": {
+          "avg": {
+            "field": "age"
+          }
+        }
+      }
+    }
+  }
+}
+
+#geo distance
+
+POST /index-agg/_search?size=0
+{
+  "aggs": {
+    "position": {
+      "geo_distance": {
+        "field": "position",
+        "origin": {
+          "lat": 83.76,
+          "lon": -81.2
+        },
+        "ranges": [
+          {
+            "to": 10
+          },
+          {
+            "from": 10,
+            "to": 20
+          },
+          {
+            "from": 20,
+            "to": 50
+          },
+          {
+            "from": 50,
+            "to": 100
+          },
+          {
+            "from": 100
+          }
+        ]
+      }
+    }
+  }
+}
+
+#child Aggregation
+
+POST /mybooks-join/_search?size=0
+{
+  "aggs": {
+    "uuid": {
+      "terms": {
+        "field": "uuid",
+        "size": 10
+      },
+      "aggs": {
+        "to-children": {
+          "children": {
+            "type": "author"
+          },
+          "aggs": {
+            "top-values": {
+              "terms": {
+                "field": "name.keyword",
+                "size": 10
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+#nested
+
+POST /mybooks-join/_search?size=0
+{
+
+  "aggs": {
+    "versions": {
+      "nested": {
+        "path": "versions"
+      },
+      "aggs": {
+        "min_size": {
+          "min": {
+            "field": "versions.size"
+          }
+        }
+      }
+    }
+  }
+}
+
+#reversed  nested
+POST /mybooks-join/_search?size=0
+{
+  "aggs": {
+    "versions": {
+      "nested": {
+        "path": "versions"
+      },
+      "aggs": {
+        "top_colors": {
+          "terms": {
+            "field": "versions.color"
+          },
+          "aggs": {
+            "version_to_book": {
+              "reverse_nested": {},
+              "aggs": {
+                "top_uuid_per_version": {
+                  "terms": {
+                    "field": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+#top hits
+POST /index-agg/_search?size=0
+{
+  "aggs": {
+    "tags": {
+      "terms": {
+        "field": "tag",
+        "size": 2
+      },
+      "aggs": {
+        "top_tag_hits": {
+          "top_hits": {
+            "sort": [
+              {
+                "age": {
+                  "order": "desc"
+                }
+              }
+            ],
+            "_source": {
+              "includes": [
+                "name"
+              ]
+            },
+            "size": 1
+          }
+        }
+      }
+    }
+  }
+}
+
+# matrix stats aggregation
+
+
+POST /index-agg/_search?size=0
+{
+  "aggs": {
+    "matrixstats": {
+      "matrix_stats": {
+        "fields": [
+          "age",
+          "price"
+        ]
+      }
+    }
+  }
+}
+
+# geo bounding
+POST /index-agg/_search?size=0
+{
+  "aggs": {
+    "box": {
+      "geo_bounds": {
+        "field": "position",
+        "wrap_longitude": true
+      }
+    }
+  }
+}
+
+#geo centroid
+POST /index-agg/_search?size=0
+{
+  "aggs": {
+    "centroid": {
+      "geo_centroid": {
+        "field": "position"
+      }
+    }
+  }
+}
+
+
+# pipeline
+
+DELETE /index-pipagg
+
+PUT /index-pipagg
+{
+  "mappings": {
+    "properties": {
+      "type": {
+        "type": "keyword"
+      },
+      "date": {
+        "type": "date"
+      }
+    }
+  }
+}
+
+PUT /_bulk  
+{"index":{"_index":"index-pipagg"}}
+{"date": "2019-01-01", "price": 200, "promoted": true, "rating": 1, "type": "hat"}
+{"index":{"_index":"index-pipagg"}}
+{"date": "2019-01-01", "price": 200, "promoted": true, "rating": 1, "type": "t-shirt"}
+{"index":{"_index":"index-pipagg"}}
+{"date": "2019-01-01", "price": 150, "promoted": true, "rating": 5, "type": "bag"}
+{"index":{"_index":"index-pipagg"}}
+{"date": "2019-02-01", "price": 50, "promoted": false, "rating": 1, "type": "hat"}
+{"index":{"_index":"index-pipagg"}}
+{"date": "2019-02-01", "price": 10, "promoted": true, "rating": 4, "type": "t-shirt"}
+{"index":{"_index":"index-pipagg"}}
+{"date": "2019-03-01", "price": 200, "promoted": true, "rating": 1, "type": "hat"}
+{"index":{"_index":"index-pipagg"}}
+{"date": "2019-03-01", "price": 175, "promoted": false, "rating":2, "type": "t-shirt"}
+
+POST /index-pipagg/_search?size=0
+{
+    "aggs" : {
+        "sales_per_month" : {
+            "date_histogram" : {
+                "field" : "date",
+                "interval" : "month"
+            },
+            "aggs": {
+                "sales": {
+                    "sum": {
+                        "field": "price"
+                    }
+                }
+            }
+        },
+        "stats_monthly_sales": {
+            "extended_stats_bucket": {
+                "buckets_path": "sales_per_month>sales" 
+            }
+        }
+    }
+}
+
+

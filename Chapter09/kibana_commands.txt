@@ -1,0 +1,65 @@
+GET /_cluster/pending_tasks
+
+#Controlling cluster state via an API
+GET /_cluster/
+
+#Getting nodes information via API
+GET /_nodes
+
+GET /_nodes/<nodeId1>,<nodeId2>
+
+GET /_nodes/os,plugins
+
+#Getting node statistics via the API
+GET /_nodes/stats
+
+GET /_nodes/<nodeId1>,<nodeId2>/stats
+
+GET /_nodes/stats/os,http
+
+#Using the task management API
+GET /_tasks
+
+GET /_tasks?nodes=nodeId1,nodeId2'
+
+GET /_tasks?nodes=nodeId1,nodeId2&actions=cluster:'
+
+GET /_tasks/-IFjP29_TOGQF-1axtNMSg:92797
+
+POST /_tasks/task_id:1/_cancel
+
+POST /_tasks/_cancel?nodes=nodeId1,nodeId2&actions=*reindex
+
+
+GET /_nodes/hot_threads
+
+GET /_nodes/{nodesIds}/hot_threads
+
+#Managing the shard allocation
+GET /_cluster/allocation/explain
+
+GET /_cluster/allocation/explain
+{
+  "index": "mybooks",
+  "shard": 0,
+  "primary": false
+}
+
+
+POST /_cluster/reroute
+{
+  "commands": [
+    {
+      "move": {
+        "index": "test-index",
+        "shard": 0,
+        "from_node": "node1",
+        "to_node": "node2"
+      }
+    }
+  ]
+}
+
+GET /mybooks/_segments
+
+POST /mybooks/_cache/clear

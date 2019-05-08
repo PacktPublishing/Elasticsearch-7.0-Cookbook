@@ -1,0 +1,13 @@
+
+REPOSITORY=aparo/cerebro
+VERSION=0.8.1
+CEREBRO_VERSION=0.8.1
+
+SUDO=
+BUILD_ARGS=--build-arg CEREBRO_VERSION=${CEREBRO_VERSION}
+
+all:
+	${SUDO} docker build ${BUILD_ARGS} -t ${REPOSITORY}:${VERSION} .
+
+push:
+	${SUDO} docker push ${REPOSITORY}:${VERSION}

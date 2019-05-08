@@ -1,0 +1,404 @@
+#term
+
+POST /mybooks/_search
+{
+  "query": {
+    "term": {
+      "uuid": "33333"
+    }
+  }
+}
+
+POST /mybooks/_search
+{
+  "query": {
+    "bool": {
+      "filter": {
+        "term": {
+          "uuid": "33333"
+        }
+      }
+    }
+  }
+}
+
+#terms
+
+POST /mybooks/_search
+{
+  "query": {
+    "terms": {
+      "uuid": [
+        "33333",
+        "32222"
+      ]
+    }
+  }
+}
+
+GET /my-index/_search
+{
+  "query": {
+    "terms": {
+      "can_see_groups": {
+        "index": "my-index",
+        "type": "user",
+        "id": "1bw71LaxSzSp_zV6NB_YGg",
+        "path": "groups"
+      }
+    }
+  }
+}
+
+#prefix
+
+POST /mybooks/_search
+{
+  "query": {
+    "prefix": {
+      "uuid": "222"
+    }
+  }
+}
+
+#wildcard
+POST /mybooks/_search
+{
+  "query": {
+    "wildcard": {
+      "uuid": "22?2*"
+    }
+  }
+}
+
+#regex
+POST /mybooks/_search
+{
+  "query": {
+    "regexp": {
+      "description": {
+        "value": "j.*",
+        "flags": "INTERSECTION|COMPLEMENT|EMPTY"
+      }
+    }
+  }
+}
+
+
+#span queries
+POST /mybooks/_search
+{
+  "query": {
+    "span_first": {
+      "match": {
+        "span_term": {
+          "description": "joe"
+        }
+      },
+      "end": 5
+    }
+  }
+}
+
+POST /mybooks/_search
+{
+  "query": {
+    "span_or": {
+      "clauses": [
+        {
+          "span_term": {
+            "description": "nice"
+          }
+        },
+        {
+          "span_term": {
+            "description": "cool"
+          }
+        },
+        {
+          "span_term": {
+            "description": "wonderful"
+          }
+        }
+      ]
+    }
+  }
+}
+
+POST /mybooks/_search
+{
+  "query": {
+    "span_multi": {
+      "match": {
+        "prefix": {
+          "description": {
+            "value": "jo"
+          }
+        }
+      }
+    }
+  }
+}
+
+POST /mybooks/_search
+{
+  "query": {
+    "span_near": {
+      "clauses": [
+        {
+          "span_term": {
+            "description": "nice"
+          }
+        },
+        {
+          "span_term": {
+            "description": "joe"
+          }
+        },
+        {
+          "span_term": {
+            "description": "guy"
+          }
+        }
+      ],
+      "slop": 3,
+      "in_order": false
+    }
+  }
+}
+
+POST /mybooks/_search
+{
+  "query": {
+    "span_not": {
+      "include": {
+        "span_term": {
+          "description": "nice"
+        }
+      },
+      "exclude": {
+        "span_near": {
+          "clauses": [
+            {
+              "span_term": {
+                "description": "not"
+              }
+            },
+            {
+              "span_term": {
+                "description": "nice"
+              }
+            }
+          ],
+          "slop": 1,
+          "in_order": true
+        }
+      }
+    }
+  }
+}
+
+POST /mybooks/_search
+{
+  "query": {
+    "span_containing": {
+      "little": {
+        "span_term": {
+          "description": "nice"
+        }
+      },
+      "big": {
+        "span_near": {
+          "clauses": [
+            {
+              "span_term": {
+                "description": "not"
+              }
+            },
+            {
+              "span_term": {
+                "description": "guy"
+              }
+            }
+          ],
+          "slop": 5,
+          "in_order": true
+        }
+      }
+    }
+  }
+}
+
+
+POST /mybooks/_search
+{
+  "query": {
+    "span_within": {
+      "little": {
+        "span_term": {
+          "description": "nice"
+        }
+      },
+      "big": {
+        "span_near": {
+          "clauses": [
+            {
+              "span_term": {
+                "description": "not"
+              }
+            },
+            {
+              "span_term": {
+                "description": "guy"
+              }
+            }
+          ],
+          "slop": 5,
+          "in_order": true
+        }
+      }
+    }
+  }
+}
+
+#match query
+POST /mybooks/_search
+{
+  "query": {
+    "match": {
+      "description": {
+        "query": "nice guy",
+        "operator": "and"
+      }
+    }
+  }
+}
+
+
+POST /mybooks/_search
+{
+  "query": {
+    "match_phrase": {
+      "description": "nice guy"
+    }
+  }
+}
+
+POST /mybooks/_search
+{
+  "query": {
+    "match_phrase_prefix": {
+      "description": "nice gu"
+    }
+  }
+}
+
+POST /mybooks/_search
+{
+  "query": {
+    "multi_match": {
+      "fields": [
+        "description",
+        "name"
+      ],
+      "query": "Bill",
+      "operator": "and"
+    }
+  }
+}
+
+#query string query
+POST /mybooks/_search
+{
+  "query": {
+    "query_string": {
+      "query": """"nice guy" -description:not price:{ * TO 5 } """,
+      "fields": [
+        "description^5"
+      ],
+      "default_operator": "and"
+    }
+  }
+}
+
+#simple query string query
+POST /mybooks/_search
+{
+  "query": {
+    "simple_query_string": {
+      "query": """"nice guy" -not""",
+      "fields": [
+        "description^5",
+        "_all"
+      ],
+      "default_operator": "and"
+    }
+  }
+}
+
+# range
+POST /mybooks/_search
+{
+  "query": {
+    "range": {
+      "position": {
+        "from": 3,
+        "to": 4,
+        "include_lower": true,
+        "include_upper": false
+      }
+    }
+  }
+}
+
+
+
+#common text
+POST /mybooks/_search
+{
+  "query": {
+    "common": {
+      "description": {
+        "query": "nice guy",
+        "cutoff_frequency": 0.001
+      }
+    }
+  }
+}
+
+#ids
+
+POST /mybooks/_search
+{
+  "query": {
+    "ids": {
+      "type": "test-type",
+      "values": [
+        "1",
+        "2",
+        "3"
+      ]
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

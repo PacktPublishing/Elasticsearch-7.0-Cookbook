@@ -1,0 +1,357 @@
+DELETE /myindex
+
+DELETE /_all
+
+PUT /myindex
+{
+  "settings": {
+    "number_of_shards": 2,
+    "number_of_replicas": 1
+  },
+  "mappings": {
+    "properties": {
+      "id": {
+        "type": "keyword",
+        "store": true
+      },
+      "date": {
+        "type": "date",
+        "store": false
+      },
+      "customer_id": {
+        "type": "keyword",
+        "store": true
+      },
+      "sent": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "text"
+      },
+      "quantity": {
+        "type": "integer"
+      },
+      "vat": {
+        "type": "double",
+        "index": true
+      }
+    }
+  }
+}
+
+POST /myindex/_close
+
+POST /myindex/
+
+DELETE /myindex
+
+PUT /myindex
+
+PUT /myindex/_mapping
+{
+  "properties": {
+    "id": {
+      "type": "keyword",
+      "store": true
+    },
+    "date": {
+      "type": "date",
+      "store": false
+    },
+    "customer_id": {
+      "type": "keyword",
+      "store": true
+    },
+    "sent": {
+      "type": "boolean"
+    },
+    "name": {
+      "type": "text"
+    },
+    "quantity": {
+      "type": "integer"
+    },
+    "vat": {
+      "type": "double",
+      "index": false
+    }
+  }
+}
+
+
+GET /myindex/_mapping
+
+POST /_reindex?pretty=true
+{
+  "source": {
+    "index": "myindex"
+  },
+  "dest": {
+    "index": "myindex2"
+  }
+}
+
+POST /myindex/_refresh
+
+POST /myindex/_doc/2qLrAfPVQvCRMe7Ku8r0Tw?refresh=true
+{
+  "id": "1234",
+  "date": "2013-06-07T12:14:54",
+  "customer_id": "customer1",
+  "sent": true,
+  "in_stock_items": 0,
+  "items": [
+    {
+      "name": "item1",
+      "quantity": 3,
+      "vat": 20
+    },
+    {
+      "name": "item2",
+      "quantity": 2,
+      "vat": 20
+    },
+    {
+      "name": "item3",
+      "quantity": 1,
+      "vat": 10
+    }
+  ]
+}
+
+POST /myindex/_flush
+
+POST /myindex/_forcemerge
+
+GET /_nodes?pretty
+
+PUT /myindex/_settings
+{
+  "settings": {
+    "index.routing.allocation.require._name": "1e9840cf42df",
+    "index.blocks.write": true
+  }
+}
+
+GET /_cluster/health?pretty
+
+PUT /myindex/_settings?
+{"index.blocks.write":true}
+
+
+POST /myindex/_shrink/reduced_index
+{
+  "settings": {
+    "index.number_of_replicas": 1,
+    "index.number_of_shards": 1,
+    "index.codec": "best_compression"
+  },
+  "aliases": {
+    "my_search_indices": {}
+  }
+}
+
+
+GET /_cluster/health?wait_for_status=yellow
+
+PUT /myindex/_settings
+{"index.blocks.write":false}
+
+HEAD /myindex/
+
+GET /myindex/_settings?pretty=true
+
+PUT /myindex/_settings
+{"index":{ "number_of_replicas": "2"}}
+
+PUT /myindex/_settings
+{"index":{"refresh_interval": "-1"}}
+
+DELETE /myindex
+
+PUT /myindex
+
+POST /myindex/_forcemerge
+
+GET /_aliases
+
+GET /myindex/_alias
+
+PUT /myindex/_alias/myalias1
+
+DELETE /myindex/_alias/myalias1
+
+POST /myindex/_aliases/user1alias
+{
+  "filter": {
+    "term": {
+      "user": "user_1"
+    }
+  },
+  "search_routing": "1,2",
+  "index_routing": "2"
+}
+
+PUT /mylogs-000001
+{
+  "aliases": {
+    "logs_write": {},
+    "logs_write2": {}
+  }
+}
+
+POST /logs_write/_rollover
+{
+  "conditions": {
+    "max_age": "7d",
+    "max_docs": 100000
+  },
+  "settings": {
+    "index.number_of_shards": 3
+  }
+}
+
+
+POST /myindex/_doc/2qLrAfPVQvCRMe7Ku8r0Tw
+{
+  "id": "1234",
+  "date": "2013-06-07T12:14:54",
+  "customer_id": "customer1",
+  "sent": true,
+  "in_stock_items": 0,
+  "items": [
+    {
+      "name": "item1",
+      "quantity": 3,
+      "vat": 20
+    },
+    {
+      "name": "item2",
+      "quantity": 2,
+      "vat": 20
+    },
+    {
+      "name": "item3",
+      "quantity": 1,
+      "vat": 10
+    }
+  ]
+}
+
+POST /myindex/_doc?routing=1
+{
+  "id": "1234",
+  "date": "2013-06-07T12:14:54",
+  "customer_id": "customer1",
+  "sent": true,
+  "in_stock_items": 0,
+  "items": [
+    {
+      "name": "item1",
+      "quantity": 3,
+      "vat": 20
+    },
+    {
+      "name": "item2",
+      "quantity": 2,
+      "vat": 20
+    },
+    {
+      "name": "item3",
+      "quantity": 1,
+      "vat": 10
+    }
+  ]
+}
+
+POST /myindex/_doc?consistency=one
+
+POST /myindex/_doc?replication=async
+
+POST /myindex/_doc?version=2
+
+POST /myindex/_doc?op_type=create
+
+POST /myindex/_doc?refresh=true
+
+POST /myindex/_doc?timeout=5m
+
+GET /myindex/_doc/2qLrAfPVQvCRMe7Ku8r0Tw
+
+GET /myindex/_doc/2qLrAfPVQvCRMe7Ku8r0Tw?_source=date,sent
+
+GET /myindex/_doc/2qLrAfPVQvCRMe7Ku8r0Tw?routing=customer_id
+
+GET /myindex/_doc/2qLrAfPVQvCRMe7Ku8r0Tw?refresh=true
+
+GET /myindex/_doc/2qLrAfPVQvCRMe7Ku8r0Tw/_source
+
+#Deleting a document
+
+DELETE /myindex/_doc/2qLrAfPVQvCRMe7Ku8r0Tw
+
+# Updating a document
+
+POST /myindex/_update/2qLrAfPVQvCRMe7Ku8r0Tw
+{
+  "script": {
+    "source": "ctx._source.in_stock_items += params.count",
+    "params": {
+      "count": 4
+    }
+  }
+}
+
+POST /myindex/_update/2qLrAfPVQvCRMe7Ku8r0Tw
+{
+  "script": {
+    "source": "ctx._source.in_stock_items += params.count",
+    "params": {
+      "count": 4
+    }
+  },
+  "upsert": {
+    "in_stock_items": 4
+  }
+}
+
+POST /myindex/_update/2qLrAfPVQvCRMe7Ku8r0Tw
+{
+  "doc": {
+    "in_stock_items": 10
+  },
+  "doc_as_upsert": true
+}
+
+
+POST /_bulk
+{ "index":{ "_index":"myindex", "_id":"1" } }
+{ "field1" : "value1", "field2" : "value2" }
+{ "delete":{ "_index":"myindex", "_id":"2" } }
+{ "create":{ "_index":"myindex", "_id":"3" } }
+{ "field1" : "value1", "field2" : "value2" }
+{ "update":{ "_index":"myindex",  "_id":"3" } }
+{ "doc":{"field1" : "value1", "field2" : "value2" }}
+
+# Speeding up GET operations (multi GET)
+
+POST /_mget
+{
+  "docs": [
+    {
+      "_index": "myindex",
+      "_id": "2qLrAfPVQvCRMe7Ku8r0Tw"
+    },
+    {
+      "_index": "myindex",
+      "_id": "2"
+    }
+  ]
+}
+ 
+ 
+GET /myindex/_mget
+{
+"ids" : ["1", "2"]
+}
+ 

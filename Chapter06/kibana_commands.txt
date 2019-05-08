@@ -1,0 +1,140 @@
+#has child
+
+POST /mybooks-join/_search
+{
+  "query": {
+    "has_child": {
+      "type": "author",
+      "query": {
+        "term": {
+          "name": "martin"
+        }
+      },
+      "inner_hits" : {}
+    }
+  }
+}
+
+POST /mybooks-join/_search
+{
+  "query": {
+    "has_child": {
+      "type": "author",
+      "score_mode": "max",
+      "query": {
+        "function_score": {
+          "script_score": {
+            "script": """doc["rating"].value"""
+          }
+        }
+      },
+      "inner_hits": {}
+    }
+  }
+}
+ 
+# has parent 
+
+POST /mybooks-join/_search
+{
+  "query": {
+    "has_parent": {
+      "parent_type": "book",
+      "query": {
+        "term": {
+          "description": "bill"
+        }
+      }
+    }
+  }
+}
+
+POST /mybooks-join/_search
+{
+  "query": {
+    "nested": {
+      "path": "versions",
+      "score_mode": "avg",
+      "query": {
+        "bool": {
+          "must": [
+            {
+              "term": {
+                "versions.color": "blue"
+              }
+            },
+            {
+              "range": {
+                "versions.size": {
+                  "gt": 10
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+
+# geo bounding
+
+POST /mygeo-index/_search?pretty
+{
+  "query": {
+    "geo_bounding_box": {
+      "pin.location": {
+        "bottom_right": {
+          "lat": 40.03,
+          "lon": 72
+        },
+        "top_left": {
+          "lat": 40.717,
+          "lon": 70.99
+        }
+      }
+    }
+  }
+}
+
+
+# geo polygon
+POST /mygeo-index/_search
+{
+  "query": {
+    "geo_polygon": {
+      "pin.location": {
+        "points": [
+          {
+            "lat": 50,
+            "lon": -30
+          },
+          {
+            "lat": 30,
+            "lon": -80
+          },
+          {
+            "lat": 80,
+            "lon": -90
+          }
+        ]
+      }
+    }
+  }
+}
+
+# geo distance
+GET /mygeo-index/_search
+{
+  "query": {
+    "geo_distance": {
+      "pin.location": {
+        "lat": 40,
+        "lon": 70
+      },
+      "distance": "200km"
+    }
+  }
+}
+
+

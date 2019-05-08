@@ -1,0 +1,287 @@
+
+PUT /_ingest/pipeline/add-user-john
+{
+  "description": "Add user john field",
+  "processors": [
+    {
+      "set": {
+        "field": "user",
+        "value": "john"
+      }
+    }
+  ],
+  "version": 1
+}
+
+DELETE /my_index
+
+PUT /my_index/_doc/my_id?pipeline=add-user-john
+{}
+
+GET /my_index/_doc/my_id
+
+#Get an ingest pipeline
+
+GET /_ingest/pipeline/add-user-john
+
+GET /_ingest/pipeline/*
+
+GET /_ingest/pipeline/add-*
+
+GET /_ingest/pipeline/add-user-john?filter_path=*.version
+
+
+#Delete an ingest pipeline
+DELETE /_ingest/pipeline/add-user-john
+
+
+#Simulate an ingest pipeline
+POST /_ingest/pipeline/_simulate
+{
+  "pipeline": {
+    "description": "Add user john field",
+    "processors": [
+      {
+        "set": {
+          "field": "user",
+          "value": "john"
+        }
+      },
+      {
+        "set": {
+          "field": "job",
+          "value": 10
+        }
+      }
+    ],
+    "version": 1
+  },
+  "docs": [
+    {
+      "_index": "index",
+      "_type": "type",
+      "_id": "1",
+      "_source": {
+        "name": "docs1"
+      }
+    },
+    {
+      "_index": "index",
+      "_type": "type",
+      "_id": "2",
+      "_source": {
+        "name": "docs2"
+      }
+    }
+  ]
+}
+
+
+POST /_ingest/pipeline/_simulate?verbose
+{
+  "pipeline": {
+    "description": "Add user john field",
+    "processors": [
+      {
+        "set": {
+          "field": "user",
+          "value": "john"
+        }
+      },
+      {
+        "set": {
+          "field": "job",
+          "value": 10
+        }
+      }
+    ],
+    "version": 1
+  },
+  "docs": [
+    {
+      "_index": "index",
+      "_type": "type",
+      "_id": "1",
+      "_source": {
+        "name": "docs1"
+      }
+    },
+    {
+      "_index": "index",
+      "_type": "type",
+      "_id": "2",
+      "_source": {
+        "name": "docs2"
+      }
+    }
+  ]
+}
+
+
+POST /_ingest/pipeline/_simulate
+{
+  "pipeline": {
+    "description": "Testing some build-processors",
+    "processors": [
+      {
+        "dot_expander": {
+          "field": "extfield.innerfield"
+        }
+      },
+      {
+        "remove": {
+          "field": "unwanted"
+        }
+      },
+      {
+        "trim": {
+          "field": "message"
+        }
+      },
+      {
+        "set": {
+          "field": "tokens",
+          "value": "{{message}}"
+        }
+      },
+      {
+        "split": {
+          "field": "tokens",
+          "separator": "\\s+"
+        }
+      },
+      {
+        "sort": {
+          "field": "tokens",
+          "order": "desc"
+        }
+      },
+      {
+        "convert": {
+          "field": "mynumbertext",
+          "target_field": "mynumber",
+          "type": "integer"
+        }
+      }
+    ]
+  },
+  "docs": [
+    {
+      "_index": "index",
+      "_type": "type",
+      "_id": "1",
+      "_source": {
+        "extfield.innerfield": "booo",
+        "unwanted": 32243,
+        "message": "155.2.124.3 GET /index.html 15442 0.038",
+        "mynumbertext": "3123"
+      }
+    }
+  ]
+}
+
+
+POST /_ingest/pipeline/_simulate
+{
+  "pipeline": {
+    "description": "Testing grok pattern",
+    "processors": [
+      {
+        "grok": {
+          "field": "message",
+          "patterns": [
+            "%{IP:client} %{WORD:method} %{URIPATHPARAM:request} %{NUMBER:bytes} %{NUMBER:duration}"
+          ]
+        }
+      }
+    ]
+  },
+  "docs": [
+    {
+      "_index": "index",
+      "_type": "type",
+      "_id": "1",
+      "_source": {
+        "message": "155.2.124.3 GET /index.html 15442 0.038"
+      }
+    }
+  ]
+}
+
+
+POST /_ingest/pipeline/_simulate
+{
+  "pipeline": {
+    "description": "custom grok pattern",
+    "processors": [
+      {
+        "grok": {
+          "field": "message",
+          "patterns": [
+            "my favorite color is %{COLOR:color}"
+          ],
+          "pattern_definitions": {
+            "COLOR": "RED|GREEN|BLUE"
+          }
+        }
+      }
+    ]
+  },
+  "docs": [
+    {
+      "_source": {
+        "message": "my favorite color is RED"
+      }
+    },
+    {
+      "_source": {
+        "message": "happy fail!!"
+      }
+    }
+  ]
+}
+
+
+#Using the ingest attachment plugin
+PUT /_ingest/pipeline/attachment
+{
+  "description": "Extract data from an attachment via Tika",
+  "processors": [
+    {
+      "attachment": {
+        "field": "data"
+      }
+    }
+  ],
+  "version": 1
+}
+
+PUT /my_index/_doc/my_id?pipeline=attachment
+{
+  "data": "e1xydGYxXGFuc2kNCkxvcmVtIGlwc3VtIGRvbG9yIHNpdCBhbWV0DQpccGFyIH0="
+}
+
+GET /my_index/_doc/my_id
+
+#Using the ingest GeoIP plugin
+PUT /_ingest/pipeline/geoip
+{
+  "description": "Extract geopoint from an IP",
+  "processors": [
+    {
+      "geoip": {
+        "field": "ip"
+      }
+    }
+  ],
+  "version": 1
+}
+
+PUT /my_index/_doc/my_id?pipeline=geoip
+{
+  "ip": "8.8.8.8"
+}
+
+GET /my_index/_doc/my_id
+
+

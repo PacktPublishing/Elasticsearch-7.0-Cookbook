@@ -1,0 +1,413 @@
+#search
+
+GET /mybooks/_search
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+GET /mybooks/_search?q=uuid:11111
+
+GET /mybooks/_search?df=uuid&q=11111
+
+GET /mybooks/_search?q=title:joe&explain=true
+
+GET /mybooks/_search?q=title:joe&stored_fields=title
+
+GET /mybooks/_search?sort=title.keyword:desc
+
+POST /mybook/_search
+{
+  "query": {
+    "match": {
+      "description": {
+        "operator": "or",
+        "query": "nice guy joe"
+      }
+    }
+  },
+  "rescore": {
+    "window_size": 100,
+    "query": {
+      "rescore_query": {
+        "match_phrase": {
+          "description": {
+            "query": "joe nice guy",
+            "slop": 2
+          }
+        }
+      },
+      "query_weight": 0.8,
+      "rescore_query_weight": 1.5
+    }
+  }
+}
+
+# Sorting
+GET /mybooks/_search
+{
+  "query": {
+    "match_all": {}
+  },
+  "sort": [
+    {
+      "price": {
+        "order": "asc",
+        "mode": "avg",
+        "unmapped_type": "double",
+        "missing": "_last"
+      }
+    },
+    "_score"
+  ]
+}
+
+GET /mybooks/_search?sort=title:desc
+
+GET /mybooks/_search?sort=title.keyword:desc
+
+# highligtinh
+
+GET /mybooks/_search?from=0&size=10
+{
+  "query": {
+    "query_string": {
+      "query": "joe"
+    }
+  },
+  "highlight": {
+    "pre_tags": [
+      "<b>"
+    ],
+    "fields": {
+      "description": {
+        "order": "score"
+      },
+      "title": {
+        "order": "score"
+      }
+    },
+    "post_tags": [
+      "</b>"
+    ]
+  }
+}
+
+#scrolling
+
+GET /mybooks/_search?scroll=10m&size=1
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+POST  /_search/scroll 
+{
+    "scroll" : "10m", 
+    "scroll_id" : "DXF1ZXJ5QW5kRmV0Y2gBAAAAAAAHdMUWNHBwdFp4NGpTTS14Y3BpVlRfZDdSdw==" 
+}
+
+
+GET /mybooks/_search?scroll=10m&size=1
+{
+  "query": {
+    "match_all": {}
+  },
+  "sort": [
+    "_doc"
+  ]
+}
+
+DELETE /_search/scroll
+{
+  "scroll_id": [
+    "DnF1ZXJ5VGhlbkZldGNoBQAA..."
+  ]
+}
+
+DELETE /_search/scroll/_all
+
+#search after
+
+GET /mybooks/_search
+{
+  "size": 1,
+  "query": {
+    "match_all": {}
+  },
+  "sort": [
+    {
+      "price": "asc"
+    },
+    {
+      "_doc": "desc"
+    }
+  ]
+}
+
+
+GET /mybooks/_search
+{
+  "size": 1,
+  "query": {
+    "match_all": {}
+  },
+  "search_after": [
+    4.3,
+    0
+  ],
+  "sort": [
+    {
+      "price": "asc"
+    },
+    {
+      "_doc": "desc"
+    }
+  ]
+}
+
+
+#inner_hits
+
+POST /mybooks-join/_search
+{
+  "query": {
+    "has_child": {
+      "type": "author",
+      "query": {
+        "term": {
+          "name": "peter"
+        }
+      },
+      "inner_hits": {}
+    }
+  }
+}
+
+
+#
+GET /mybooks/_search
+{
+  "suggest": {
+    "suggest1": {
+      "text": "we find tester",
+      "term": {
+        "field": "description"
+      }
+    }
+  }
+}
+
+#count
+
+GET /mybooks/_count
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+GET /mybooks/_count?q=uuid:11111
+
+GET /mybooks/_count?q=uuid:11111
+
+# explain
+GET /mybooks/_doc/1/_explain?pretty
+{
+  "query": {
+    "term": {
+      "uuid": "11111"
+    }
+  }
+}
+
+
+#profile
+
+GET /mybooks/_search
+{
+  "profile": true,
+  "query": {
+    "term": {
+      "uuid": "11111"
+    }
+  }
+}
+
+
+#delete by query
+POST /mybooks/_delete_by_query
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+DELETE /mybooks/_delete_by_query?q=uuid:11111
+
+# update by query
+
+POST /mybooks/_update_by_query
+{
+  "query": {
+    "match_all": {}
+  },
+  "script": {
+    "source": "ctx._source.quantity=50"
+  }
+}
+
+POST /mybooks/_update_by_query
+{
+  "script": {
+    "source": "ctx._source.hit=4"
+  },
+  "query": {
+    "match_all": {}
+  }
+}
+
+#match all
+
+POST /mybooks/_search
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+
+# boolean query
+POST /mybooks/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "description": "joe"
+          }
+        }
+      ],
+      "must_not": [
+        {
+          "range": {
+            "position": {
+              "from": 10,
+              "to": 20
+            }
+          }
+        }
+      ],
+      "should": [
+        {
+          "term": {
+            "uuid": "11111"
+          }
+        },
+        {
+          "term": {
+            "uuid": "22222"
+          }
+        }
+      ],
+      "filter": [
+        {
+          "term": {
+            "description": "joe"
+          }
+        }
+      ],
+      "minimum_should_match": 1,
+      "boost": 1
+    }
+  }
+}
+
+POST /mybooks/_search
+{
+  "query": {
+    "bool": {
+          "should": [
+        {
+          "term": {
+            "uuid": {
+              "value": "11111",
+              "_name": "uuid:11111:matched"
+            }
+          }
+        },
+        {
+          "term": {
+            "uuid": {
+              "value": "22222",
+              "_name": "uuid:22222:matched"
+            }
+          }
+        }
+      ],
+      "filter": [
+        {
+          "term": {
+            "description": {
+              "value": "joe",
+              "_name": "fiter:term:joe"
+            }
+          }
+        }
+      ],
+      "minimum_should_match": 1,
+      "boost": 1
+    }
+  }
+}
+
+
+# template search
+POST /_search/template
+{
+  "source": {
+    "query": {
+      "term": {
+        "uuid": "{{value}}"
+      }
+    }
+  },
+  "params": {
+    "value": "22222"
+  }
+}
+
+POST _scripts/myTemplate
+{
+  "script": {
+    "lang": "mustache",
+    "source": {
+      "query": {
+        "term": {
+          "uuid": "{{value}}"
+        }
+      }
+    }
+  }
+}
+
+POST /mybooks/_search/template
+{
+  "id": "myTemplate",
+  "params": {
+    "value": "22222"
+  }
+}
+
+POST /_render/template
+{
+  "id": "myTemplate",
+  "params": {
+    "value": "22222"
+  }
+}
+
+

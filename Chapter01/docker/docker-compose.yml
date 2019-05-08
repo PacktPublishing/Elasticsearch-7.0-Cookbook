@@ -1,0 +1,48 @@
+version: '2'
+
+services:
+
+  elasticsearch:
+    build: elasticsearch/
+    container_name: elasticsearch
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+      - elasticsearch-backup:/backup
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      ES_JAVA_OPTS: "-Xmx1024m -Xms1024m"
+      discovery.type: "single-node"
+
+  kibana:
+    build: kibana/
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+
+  cerebro:
+    build: cerebro/
+    container_name: cerebro
+    ports:
+      - "9000:9000"
+    depends_on:
+      - elasticsearch
+
+  elasticsearchhq:
+    image: elastichq/elasticsearch-hq
+    container_name: elasticsearchhq
+    ports:
+      - "5000:5000"
+    environment:
+      HQ_DEFAULT_URL: 'http://elasticsearch:9200'
+    depends_on:
+      - elasticsearch
+
+volumes:
+  elasticsearch-data:
+    driver: local
+  elasticsearch-backup:
+    driver: local

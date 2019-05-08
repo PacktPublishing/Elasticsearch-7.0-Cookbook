@@ -1,0 +1,247 @@
+GET _search
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+PUT test
+
+DELETE test
+
+PUT test/_doc/1
+{"name":"Paul", "age":35}
+
+GET test/_mapping
+
+PUT test/_mapping
+{
+  "properties" : {
+    "id" : {"type" : "keyword"},
+    "date" : {"type" : "date"},
+    "customer_id" : {"type" : "keyword"},
+    "sent" : {"type" : "boolean"},
+    "name" : {"type" : "keyword"},
+    "quantity" : {"type" : "integer"},
+    "vat" : {"type" : "double", "index":"false"}
+  }
+}
+
+PUT test
+
+PUT test/_mapping
+{
+  "properties": {
+    "join_field": {
+      "type": "join",
+      "relations": {
+        "order": "item"
+      }
+    },
+    "id": {
+      "type": "keyword",
+      "store": "true"
+    },
+    "date": {
+      "type": "date"
+    },
+    "customer_id": {
+      "type": "keyword",
+      "store": "true"
+    },
+    "sent": {
+      "type": "boolean"
+    },
+    "name": {
+      "type": "text"
+    },
+    "quantity": {
+      "type": "integer"
+    },
+    "price": {
+      "type": "double"
+    },
+    "vat": {
+      "type": "double"
+    }
+  }
+}
+
+
+PUT test/_doc/1?refresh
+{
+  "id": "1",
+  "date": "2018-11-16T20:07:45Z",
+  "customer_id": "100",
+  "sent": true,
+  "join_field": "order" 
+}
+
+PUT test/_doc/c1?routing=1&refresh
+{
+  "name": "tshirt",
+  "quantity": 10,
+  "price": 4.3,
+  "vat": 8.5,
+  "join_field": {
+    "name": "item", 
+    "parent": "1" 
+  }
+}
+
+
+PUT test/_mapping
+{
+  "properties" : {
+    "id" : {"type" : "keyword"},
+    "date" : {"type" : "date"},
+    "customer_id" : {"type" : "keyword"},
+    "sent" : {"type" : "boolean"},
+    "item" : {"type" : "object",
+      "properties" : {
+          "name" : {"type" : "keyword"},
+          "quantity" : {"type" : "long"},
+          "cost" : {"type": "alias", "path":"item.price"},
+          "price" : {"type" : "double"},
+          "vat" : {"type" : "double"}
+        }
+    }
+  }
+}
+
+
+PUT test/_doc/1?refresh
+{
+  "id": "1",
+  "date": "2018-11-16T20:07:45Z",
+  "customer_id": "100",
+  "sent": true,
+  "item": [
+    {
+      "name": "tshirt",
+      "quantity": 10,
+      "price": 4.3,
+      "vat": 8.5
+    }
+  ]
+}
+
+GET test/_mapping
+
+GET test/_search
+{
+  "query": {
+    "term" : {
+      "item.cost" : 4.3
+    }
+  }
+}
+
+PUT test-percolator
+{
+  "mappings": {
+    "properties": {
+      "query" : {
+        "type" : "percolator"
+      },
+      "body" : {
+        "type": "text"
+       }
+     }
+   }
+}
+
+PUT test-percolator/_doc/1?refresh
+{
+  "query" : {
+    "match" : {
+      "body" : "quick brown fox"
+    }
+  }
+}
+
+GET test-percolator/_search
+{
+  "query": {
+    "percolate" : {
+      "field" : "query",
+      "document" : {
+        "body" : "fox jumps over the lazy dog"
+      }
+    }
+  }
+}
+
+PUT test-feature
+{
+  "mappings": {
+    "properties": {
+      "pagerank": {
+        "type": "feature" 
+      },
+      "url_length": {
+        "type": "feature",
+        "positive_score_impact": false 
+      }
+    }
+  }
+}
+
+PUT test-feature/_doc/1
+{
+  "pagerank": 5,
+  "url_length": 20
+}
+
+PUT test-feature/_doc/1
+{
+  "pagerank": 10,
+  "url_length": 15
+}
+
+
+GET test-feature/_search
+{
+  "query": {
+    "term": {
+      "pagerank": 5
+    }
+  }
+}
+
+PUT test-features
+{
+  "mappings": {
+    "properties": {
+      "categories": {
+        "type": "feature_vector" 
+      }
+    }
+  }
+}
+
+PUT test-features/_doc/1
+{
+  "categories": { 
+    "sport": 14.2,
+    "economic": 24.3
+  }
+}
+
+PUT test-features/_doc/2
+{
+  "categories": {
+    "sport": 19.2,
+    "economic": 23.1
+  }
+}
+
+GET test-features/_search
+{
+  "query": {
+    "feature": {
+      "field": "categories.sport"
+    }
+  }
+}
+
